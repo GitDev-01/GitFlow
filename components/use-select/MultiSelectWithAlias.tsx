@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { X, Search, ChevronDown, Check } from 'lucide-react'
-import { MultiSelect } from './MultiSelect'
+import { FlowNodeData } from '@/types/flow'
 
 interface Item {
   id: string
@@ -12,6 +12,15 @@ interface Item {
 interface SelectedItem extends Item {
   alias: string
 }
+
+export interface MultiSelectWithAlias {
+  items: Item[], 
+  saveValues: (id: string, data: Partial<FlowNodeData>) => void, 
+  nodeId: string, 
+  label: string
+  values: SelectedItem[] // values already in node data i.e. selected by the user before
+}
+
 
 const AVAILABLE_ITEMS: Item[] = [
   { id: '1',  name: 'Wireless Headphones' },
@@ -66,12 +75,33 @@ const AVAILABLE_ITEMS: Item[] = [
   { id: '50', name: 'Monitor Light Bar' },
 ]
 
-export function MultiSelectWithAlias({items, saveItems, nodeId, label }: MultiSelect) {
-  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([])
+export function MultiSelectWithAlias({items, saveValues, nodeId, label, values }: MultiSelectWithAlias) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+
+  const saveSelectedItems = (values: SelectedItem[]) => {
+    const inputFormat = values.map((item)=>{
+        if (item.name.includes("-")){
+            const arr = item.name.split(" - ")
+            let formatedNameString = ""
+
+            if (item.name.includes("Convesation")){
+                formatedNameString = (arr[1].replace(" ", "_").toLocaleLowerCase()+":"+arr[0])
+
+            } else {
+                formatedNameString = ("context:"+arr[0]+"."+arr[1].replace(" ", "_").toLocaleLowerCase()) 
+            }
+
+            return {from: formatedNameString, as: item.alias }
+        } else {
+            return {from: item.name.replace(" ", "_").toLocaleLowerCase(), as: item.alias}
+        }
+    })
+
+    saveValues(nodeId, {[label]: inputFormat})
+  }
 
   const filtered = query.trim()
     ? items.filter((item) =>
@@ -80,25 +110,23 @@ export function MultiSelectWithAlias({items, saveItems, nodeId, label }: MultiSe
     : items
 
   const toggleItem = useCallback((item: Item) => {
-    setSelectedItems((prev) => {
-      const exists = prev.find((i) => i.id === item.id)
-      return exists
-        ? prev.filter((i) => i.id !== item.id)
-        : [...prev, { ...item, alias: '' }]
-    })
-  }, [])
+    const exists = values.find((i) => i.id === item.id)
 
-  const removeItem = useCallback((itemId: string) => {
-    setSelectedItems((prev) => prev.filter((i) => i.id !== itemId))
-  }, [])
-
-  const updateAlias = useCallback((itemId: string, alias: string) => {
-    setSelectedItems((prev) =>
-      prev.map((i) => (i.id === itemId ? { ...i, alias } : i))
+    saveSelectedItems( exists
+        ? values.filter((i) => i.id !== item.id)
+        : [...values, { ...item, alias: '' }]
     )
   }, [])
 
-  const clearAll = useCallback(() => setSelectedItems([]), [])
+  const removeItem = useCallback((itemId: string) => {
+    saveSelectedItems(values.filter((i) => i.id !== itemId))
+  }, [])
+
+  const updateAlias = useCallback((itemId: string, alias: string) => {
+    saveSelectedItems( values.map((i) => (i.id === itemId ? { ...i, alias } : i)) )
+  }, [])
+
+  const clearAll = useCallback(() => saveSelectedItems([]), [])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -118,30 +146,7 @@ export function MultiSelectWithAlias({items, saveItems, nodeId, label }: MultiSe
     }
   }, [isOpen])
 
-  const count = selectedItems.length
-
-  useEffect(()=>{
-    const inputFormat = selectedItems.map((item)=>{
-        if (item.name.includes("-")){
-            const arr = item.name.split(" - ")
-            let formatedNameString = ""
-
-            if (item.name.includes("Convesation")){
-                formatedNameString = (arr[1].replace(" ", "_").toLocaleLowerCase()+":"+arr[0])
-
-            } else {
-                formatedNameString = ("context:"+arr[0]+"."+arr[1].replace(" ", "_").toLocaleLowerCase()) 
-            }
-
-            return {from: formatedNameString, as: item.alias }
-        } else {
-            return {from: item.name.replace(" ", "_").toLocaleLowerCase(), as: item.alias}
-        }
-    })
-
-    saveItems(nodeId, {[label]: inputFormat})
-    
-  }, [selectedItems])
+  const count = values.length
 
   return (
     <div ref={containerRef} className="w-full max-w-xl mx-auto font-sans">
@@ -218,7 +223,7 @@ export function MultiSelectWithAlias({items, saveItems, nodeId, label }: MultiSe
               </li>
             ) : (
               filtered.map((item) => {
-                const isSelected = selectedItems.some((i) => i.id === item.id)
+                const isSelected = values.some((i) => i.id === item.id)
                 return (
                   <li
                     key={item.id}
@@ -255,7 +260,7 @@ export function MultiSelectWithAlias({items, saveItems, nodeId, label }: MultiSe
       {/* Selected items with alias inputs */}
       {count > 0 && (
         <ul className="mt-3 flex flex-col gap-2">
-          {selectedItems.map((item) => (
+          {values.map((item) => (
             <li
               key={item.id}
               className="flex gap-3 px-3 py-2.5 bg-background border border-border rounded-lg"

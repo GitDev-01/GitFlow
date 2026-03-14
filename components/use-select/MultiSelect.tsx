@@ -11,9 +11,10 @@ interface Item {
 
 export interface MultiSelect {
   items: Item[], 
-  saveItems: (id: string, data: Partial<FlowNodeData>) => void, 
+  saveValues: (id: string, data: Partial<FlowNodeData>) => void, 
   nodeId: string, 
   label: string
+  values: Item[] // values already in node data i.e. selected by the user before
 }
 
 const AVAILABLE_ITEMS: Item[] = [
@@ -69,12 +70,16 @@ const AVAILABLE_ITEMS: Item[] = [
   { id: '50', name: 'Monitor Light Bar' },
 ]
 
-export function MultiSelect({items, saveItems, nodeId, label}: MultiSelect) {
-  const [selectedItems, setSelectedItems] = useState<Item[]>([])
+export function MultiSelect({items, saveValues, nodeId, label, values}: MultiSelect) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+
+  const saveSelectedItems = (values: Item[]) => {
+    const items = values.map((item)=>{return item.name})
+    saveValues(nodeId, {[label]: items})
+  }
 
   const filtered = query.trim()
     ? items.filter((item) =>
@@ -83,17 +88,15 @@ export function MultiSelect({items, saveItems, nodeId, label}: MultiSelect) {
     : items
 
   const toggleItem = useCallback((item: Item) => {
-    setSelectedItems((prev) => {
-      const exists = prev.find((i) => i.id === item.id)
-      return exists ? prev.filter((i) => i.id !== item.id) : [...prev, item]
-    })
+    const exists = values.find((i) => i.id === item.id)
+    saveSelectedItems( exists ? values.filter((i) => i.id !== item.id) : [...values, item])
   }, [])
 
   const removeItem = useCallback((itemId: string) => {
-    setSelectedItems((prev) => prev.filter((i) => i.id !== itemId))
+    saveSelectedItems(values.filter((i) => i.id !== itemId))
   }, [])
 
-  const clearAll = useCallback(() => setSelectedItems([]), [])
+  const clearAll = useCallback(() => saveSelectedItems([]), [])
 
   // Close on outside click
   useEffect(() => {
@@ -115,12 +118,7 @@ export function MultiSelect({items, saveItems, nodeId, label}: MultiSelect) {
     }
   }, [isOpen])
 
-  useEffect(()=>{
-    const items = selectedItems.map((item)=>{return item.name})
-    saveItems(nodeId, {[label]: items})
-  }, [selectedItems])
-
-  const count = selectedItems.length
+  const count = values.length
 
   return (
     <div ref={containerRef} className="w-full max-w-xl mx-auto font-sans">
@@ -147,7 +145,7 @@ export function MultiSelect({items, saveItems, nodeId, label}: MultiSelect) {
         <div className="flex-1 min-w-0 overflow-hidden">
           {count > 0 ? (
             <div className="max-h-24 overflow-y-auto flex flex-wrap gap-1.5 pr-1">
-              {selectedItems.map((item) => (
+              {values.map((item) => (
                 <span
                   key={item.id}
                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-xs font-medium shrink-0"
@@ -228,7 +226,7 @@ export function MultiSelect({items, saveItems, nodeId, label}: MultiSelect) {
               </li>
             ) : (
               filtered.map((item) => {
-                const isSelected = selectedItems.some((i) => i.id === item.id)
+                const isSelected = values.some((i) => i.id === item.id)
                 return (
                   <li
                     key={item.id}
