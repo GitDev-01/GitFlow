@@ -127,3 +127,12 @@
     @apply font-sans;
   }
 }
+
+html, body {
+    font-family: "Arial narrow", monospace;
+    font-size: 16px; /* Base font size */
+    line-height: 1; /* Improves readability */
+    color: #333; /* Default text color */
+    margin: 0;
+    padding: 0;
+}
