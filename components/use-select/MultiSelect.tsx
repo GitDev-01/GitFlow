@@ -12,63 +12,10 @@ interface Item {
 export interface MultiSelect {
   items: Item[], 
   saveValues: (id: string, data: Partial<FlowNodeData>) => void, 
-  nodeId: string, 
+  nodeId: string,
   label: string
-  values: Item[] // values already in node data i.e. selected by the user before
+  values: string[] // values already in node data i.e. selected by the user before
 }
-
-const AVAILABLE_ITEMS: Item[] = [
-  { id: '1',  name: 'Wireless Headphones' },
-  { id: '2',  name: 'USB-C Cable' },
-  { id: '3',  name: 'Phone Case' },
-  { id: '4',  name: 'Screen Protector' },
-  { id: '5',  name: 'Portable Charger' },
-  { id: '6',  name: 'Desk Mount' },
-  { id: '7',  name: 'Mechanical Keyboard' },
-  { id: '8',  name: 'Mouse Pad' },
-  { id: '9',  name: 'Webcam' },
-  { id: '10', name: 'LED Desk Lamp' },
-  { id: '11', name: 'Monitor Stand' },
-  { id: '12', name: 'Cable Organizer' },
-  { id: '13', name: 'Laptop Sleeve' },
-  { id: '14', name: 'USB Hub' },
-  { id: '15', name: 'Wireless Mouse' },
-  { id: '16', name: 'HDMI Adapter' },
-  { id: '17', name: 'Notebook' },
-  { id: '18', name: 'Sticky Notes' },
-  { id: '19', name: 'Ballpoint Pen Set' },
-  { id: '20', name: 'Desk Organizer' },
-  { id: '21', name: 'Wrist Rest' },
-  { id: '22', name: 'Laptop Stand' },
-  { id: '23', name: 'Thermal Paste' },
-  { id: '24', name: 'Compressed Air Can' },
-  { id: '25', name: 'Microfiber Cloth' },
-  { id: '26', name: 'Screen Cleaner' },
-  { id: '27', name: 'Cable Clips' },
-  { id: '28', name: 'Velcro Straps' },
-  { id: '29', name: 'Power Strip' },
-  { id: '30', name: 'Surge Protector' },
-  { id: '31', name: 'Ethernet Cable' },
-  { id: '32', name: 'Network Switch' },
-  { id: '33', name: 'Wi-Fi Extender' },
-  { id: '34', name: 'Smart Plug' },
-  { id: '35', name: 'Bluetooth Speaker' },
-  { id: '36', name: 'Earbuds' },
-  { id: '37', name: 'Microphone' },
-  { id: '38', name: 'Headphone Stand' },
-  { id: '39', name: 'Soundbar' },
-  { id: '40', name: 'Drawing Tablet' },
-  { id: '41', name: 'SD Card' },
-  { id: '42', name: 'Card Reader' },
-  { id: '43', name: 'External SSD' },
-  { id: '44', name: 'Flash Drive' },
-  { id: '45', name: 'Portable HDD' },
-  { id: '46', name: 'Privacy Screen' },
-  { id: '47', name: 'Anti-Glare Film' },
-  { id: '48', name: 'Chair Cushion' },
-  { id: '49', name: 'Footrest' },
-  { id: '50', name: 'Monitor Light Bar' },
-]
 
 export function MultiSelect({items, saveValues, nodeId, label, values}: MultiSelect) {
   const [isOpen, setIsOpen] = useState(false)
@@ -76,10 +23,9 @@ export function MultiSelect({items, saveValues, nodeId, label, values}: MultiSel
   const containerRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const saveSelectedItems = (values: Item[]) => {
-    const items = values.map((item)=>{return item.name})
-    saveValues(nodeId, {[label]: items})
-  }
+  const saveSelectedItems = useCallback((values: string[]) => {
+    saveValues(nodeId, {[label]: values})
+  }, [saveValues, nodeId, label])
 
   const filtered = query.trim()
     ? items.filter((item) =>
@@ -87,16 +33,16 @@ export function MultiSelect({items, saveValues, nodeId, label, values}: MultiSel
       )
     : items
 
-  const toggleItem = useCallback((item: Item) => {
-    const exists = values.find((i) => i.id === item.id)
-    saveSelectedItems( exists ? values.filter((i) => i.id !== item.id) : [...values, item])
-  }, [])
+  const toggleItem = (item: string) => {
+    const exists = values.find((i) => i === item)
+    saveSelectedItems( exists ? values.filter((i) => i !== item) : [...values, item])
+  }
 
-  const removeItem = useCallback((itemId: string) => {
-    saveSelectedItems(values.filter((i) => i.id !== itemId))
-  }, [])
+  const removeItem = useCallback((itemName: string) => {
+    saveSelectedItems(values.filter((i) => i !== itemName))
+  }, [values, saveSelectedItems])
 
-  const clearAll = useCallback(() => saveSelectedItems([]), [])
+  const clearAll = useCallback(() => saveSelectedItems([]), [saveSelectedItems])
 
   // Close on outside click
   useEffect(() => {
@@ -145,24 +91,24 @@ export function MultiSelect({items, saveValues, nodeId, label, values}: MultiSel
         <div className="flex-1 min-w-0 overflow-hidden">
           {count > 0 ? (
             <div className="max-h-24 overflow-y-auto flex flex-wrap gap-1.5 pr-1">
-              {values.map((item) => (
+              {values.map((item, index) => (
                 <span
-                  key={item.id}
+                  key={index}
                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md text-xs font-medium shrink-0"
                 >
-                  {item.name}
+                  {item}
                   <span
                     role="button"
                     tabIndex={0}
-                    aria-label={`Remove ${item.name}`}
+                    aria-label={`Remove ${item}`}
                     onClick={(e) => {
                       e.stopPropagation()
-                      removeItem(item.id)
+                      removeItem(item)
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.stopPropagation()
-                        removeItem(item.id)
+                        removeItem(item)
                       }
                     }}
                     className="hover:text-foreground transition-colors cursor-pointer"
@@ -225,14 +171,14 @@ export function MultiSelect({items, saveValues, nodeId, label, values}: MultiSel
                 No items match &quot;{query}&quot;
               </li>
             ) : (
-              filtered.map((item) => {
-                const isSelected = values.some((i) => i.id === item.id)
+              filtered.map((item, index) => {
+                const isSelected = values.some((i) => i === item.name)
                 return (
                   <li
-                    key={item.id}
+                    key={index}
                     role="option"
                     aria-selected={isSelected}
-                    onClick={() => toggleItem(item)}
+                    onClick={() => toggleItem(item.name)}
                     className={`flex items-center justify-between px-3 py-2.5 cursor-pointer text-sm transition-colors
                       ${isSelected
                         ? 'bg-primary/8 text-foreground'

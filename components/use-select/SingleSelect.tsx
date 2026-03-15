@@ -7,20 +7,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { FlowNodeData } from "@/types/flow"
+import { FlowAppNode, FlowNodeData } from "@/types/flow"
 import { useEffect, useState } from "react"
 import { Button } from "../ui/button"
 import { CircleXIcon } from "lucide-react"
 
-export function SingleSelect({label, items, saveValue, selectedNodeId}: {label: string, items: string[], saveValue: (id: string, data: Partial<FlowNodeData>) => void, selectedNodeId: string}) {
+export function SingleSelect({label, items, saveValue, selectedNodeId, value, selectedNode}: {label: string, items: string[], saveValue: (id: string, data: Partial<FlowNodeData>) => void, selectedNodeId: string, value: string, selectedNode?: FlowAppNode}) {
 
   return (
     <div className="flex flex-row items-center gap-2">
     <Select
-      onValueChange={(value) => saveValue(selectedNodeId, { [label]: value })}
+      value={value}
+      onValueChange={(value) => {
+        (label === "placeholder" && selectedNode)? 
+        saveValue(selectedNodeId, { prompt_template: {...selectedNode.data.prompt_template, placeholder: value } }):
+        (label === "toolset" && selectedNode?.type === "deterministicComponent")?
+        saveValue(selectedNodeId, { toolset: [value] }):
+        saveValue(selectedNodeId, { [label]: value })
+      }}
     >
       <SelectTrigger className="w-full max-w-48">
-        <SelectValue placeholder="Select"/>
+        <SelectValue placeholder="Select" defaultValue={"tool"}/>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
@@ -28,7 +35,7 @@ export function SingleSelect({label, items, saveValue, selectedNodeId}: {label: 
           {items.map((item, index)=>(
             <SelectItem key={index} value={item}>{item}</SelectItem>
           ))}
-          <SelectItem value={"none"}>{"none"}</SelectItem>  
+          <SelectItem value={"null"}>{"null"}</SelectItem>  
 
         </SelectGroup>
       </SelectContent>

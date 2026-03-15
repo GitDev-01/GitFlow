@@ -13,15 +13,15 @@ export function parseYamlToGraph(yamlText: string): { nodes: FlowAppNode[], edge
     // 1. Create START node
     if (config.flow?.entry_point) {
         nodes.push({
-            id: 'START',
+            id: 'start',
             type: 'start',
             position: { x: 0, y: 0 },
-            data: { name: 'START' },
+            data: { name: 'start' },
         });
 
         edges.push({
             id: `e-start-${config.flow.entry_point}`,
-            source: 'START',
+            source: 'start',
             target: config.flow.entry_point,
             type: 'router',
         });
@@ -62,32 +62,36 @@ export function parseYamlToGraph(yamlText: string): { nodes: FlowAppNode[], edge
                 }
             });
 
-            edges.push({
-                id: `deps-prompt-${comp.name}`,
-                source: prompterId,
-                target: comp.name,
-                type: 'dependency',
-            });
+            // Prompter no longer uses an edge connection 
+
+            // edges.push({
+            //     id: `deps-prompt-${comp.name}`,
+            //     source: prompterId,
+            //     target: comp.name,
+            //     type: 'dependency',
+            // });
         }
 
+        // Toolbox component is deprecated and removed
+
         // Handle Toolbox node
-        if (comp.type !== 'DeterministicStepComponent' && (comp as any).toolset?.length > 0) {
-            const toolboxId = `toolbox-${comp.name}`;
-            nodes.push({
-                id: toolboxId,
-                type: 'toolbox',
-                position: { x: 0, y: 0 },
-                data: {
-                    toolset: (comp as any).toolset
-                }
-            });
-            edges.push({
-                id: `deps-tools-${comp.name}`,
-                source: comp.name,
-                target: toolboxId,
-                type: 'dependency',
-            });
-        }
+        // if (comp.type !== 'DeterministicStepComponent' && (comp as any).toolset?.length > 0) {
+        //     const toolboxId = `toolbox-${comp.name}`;
+        //     nodes.push({
+        //         id: toolboxId,
+        //         type: 'toolbox',
+        //         position: { x: 0, y: 0 },
+        //         data: {
+        //             toolset: (comp as any).toolset
+        //         }
+        //     });
+        //     edges.push({
+        //         id: `deps-tools-${comp.name}`,
+        //         source: comp.name,
+        //         target: toolboxId,
+        //         type: 'dependency',
+        //     });
+        // }
     });
 
     // 3. Map Routers
@@ -99,7 +103,7 @@ export function parseYamlToGraph(yamlText: string): { nodes: FlowAppNode[], edge
                 target: router.to,
                 type: 'router',
             });
-            if (router.to === 'end') hasEndTarget.add('END');
+            if (router.to === 'end') hasEndTarget.add('end');
         } else if (router.condition) {
             Object.entries(router.condition.routes).forEach(([label, target]) => {
                 edges.push({
@@ -110,7 +114,7 @@ export function parseYamlToGraph(yamlText: string): { nodes: FlowAppNode[], edge
                     type: 'router',
                     data: { condition_input: router.condition?.input }
                 });
-                if (target === 'end') hasEndTarget.add('END');
+                if (target === 'end') hasEndTarget.add('end');
             });
         }
     });
@@ -121,7 +125,7 @@ export function parseYamlToGraph(yamlText: string): { nodes: FlowAppNode[], edge
             id: 'end',
             type: 'end',
             position: { x: 0, y: 0 },
-            data: { name: 'END' },
+            data: { name: 'end' },
         });
     }
 

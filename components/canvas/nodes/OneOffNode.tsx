@@ -5,7 +5,7 @@ export default function OneOffNode({ data }: NodeProps<FlowAppNode>) {
     return (
         <div className="bg-white border-2 border-amber-500 rounded-lg shadow-md min-w-[150px]">
             <div className="bg-amber-500 text-white px-3 py-1 rounded-t-sm text-sm font-semibold">
-                {data.name || 'OneOffComponent'}
+                {data.name}
             </div>
             <div className="p-3">
                 {data.prompt_id && (

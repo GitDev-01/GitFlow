@@ -21,85 +21,14 @@ export interface MultiSelectWithAlias {
   values: SelectedItem[] // values already in node data i.e. selected by the user before
 }
 
-
-const AVAILABLE_ITEMS: Item[] = [
-  { id: '1',  name: 'Wireless Headphones' },
-  { id: '2',  name: 'USB-C Cable' },
-  { id: '3',  name: 'Phone Case' },
-  { id: '4',  name: 'Screen Protector' },
-  { id: '5',  name: 'Portable Charger' },
-  { id: '6',  name: 'Desk Mount' },
-  { id: '7',  name: 'Mechanical Keyboard' },
-  { id: '8',  name: 'Mouse Pad' },
-  { id: '9',  name: 'Webcam' },
-  { id: '10', name: 'LED Desk Lamp' },
-  { id: '11', name: 'Monitor Stand' },
-  { id: '12', name: 'Cable Organizer' },
-  { id: '13', name: 'Laptop Sleeve' },
-  { id: '14', name: 'USB Hub' },
-  { id: '15', name: 'Wireless Mouse' },
-  { id: '16', name: 'HDMI Adapter' },
-  { id: '17', name: 'Notebook' },
-  { id: '18', name: 'Sticky Notes' },
-  { id: '19', name: 'Ballpoint Pen Set' },
-  { id: '20', name: 'Desk Organizer' },
-  { id: '21', name: 'Wrist Rest' },
-  { id: '22', name: 'Laptop Stand' },
-  { id: '23', name: 'Thermal Paste' },
-  { id: '24', name: 'Compressed Air Can' },
-  { id: '25', name: 'Microfiber Cloth' },
-  { id: '26', name: 'Screen Cleaner' },
-  { id: '27', name: 'Cable Clips' },
-  { id: '28', name: 'Velcro Straps' },
-  { id: '29', name: 'Power Strip' },
-  { id: '30', name: 'Surge Protector' },
-  { id: '31', name: 'Ethernet Cable' },
-  { id: '32', name: 'Network Switch' },
-  { id: '33', name: 'Wi-Fi Extender' },
-  { id: '34', name: 'Smart Plug' },
-  { id: '35', name: 'Bluetooth Speaker' },
-  { id: '36', name: 'Earbuds' },
-  { id: '37', name: 'Microphone' },
-  { id: '38', name: 'Headphone Stand' },
-  { id: '39', name: 'Soundbar' },
-  { id: '40', name: 'Drawing Tablet' },
-  { id: '41', name: 'SD Card' },
-  { id: '42', name: 'Card Reader' },
-  { id: '43', name: 'External SSD' },
-  { id: '44', name: 'Flash Drive' },
-  { id: '45', name: 'Portable HDD' },
-  { id: '46', name: 'Privacy Screen' },
-  { id: '47', name: 'Anti-Glare Film' },
-  { id: '48', name: 'Chair Cushion' },
-  { id: '49', name: 'Footrest' },
-  { id: '50', name: 'Monitor Light Bar' },
-]
-
 export function MultiSelectWithAlias({items, saveValues, nodeId, label, values }: MultiSelectWithAlias) {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const saveSelectedItems = (values: SelectedItem[]) => {
-    const inputFormat = values.map((item)=>{
-        if (item.name.includes("-")){
-            const arr = item.name.split(" - ")
-            let formatedNameString = ""
-
-            if (item.name.includes("Convesation")){
-                formatedNameString = (arr[1].replace(" ", "_").toLocaleLowerCase()+":"+arr[0])
-
-            } else {
-                formatedNameString = ("context:"+arr[0]+"."+arr[1].replace(" ", "_").toLocaleLowerCase()) 
-            }
-
-            return {from: formatedNameString, as: item.alias }
-        } else {
-            return {from: item.name.replace(" ", "_").toLocaleLowerCase(), as: item.alias}
-        }
-    })
-
+  const saveSelectedValues = (selectedValues: SelectedItem[]) => {
+    const inputFormat = selectedValues.map((item)=>({from: item.name, as: item.alias }))
     saveValues(nodeId, {[label]: inputFormat})
   }
 
@@ -110,23 +39,23 @@ export function MultiSelectWithAlias({items, saveValues, nodeId, label, values }
     : items
 
   const toggleItem = useCallback((item: Item) => {
-    const exists = values.find((i) => i.id === item.id)
+    const exists = values.find((i) => i.name === item.name)
 
-    saveSelectedItems( exists
-        ? values.filter((i) => i.id !== item.id)
+    saveSelectedValues(exists
+        ? values.filter((i) => i.name !== item.name)
         : [...values, { ...item, alias: '' }]
     )
-  }, [])
+  }, [values, saveSelectedValues])
 
-  const removeItem = useCallback((itemId: string) => {
-    saveSelectedItems(values.filter((i) => i.id !== itemId))
-  }, [])
+  const removeItem = useCallback((itemName: string) => {
+    saveSelectedValues(values.filter((i) => i.name !== itemName))
+  }, [values, saveSelectedValues])
 
-  const updateAlias = useCallback((itemId: string, alias: string) => {
-    saveSelectedItems( values.map((i) => (i.id === itemId ? { ...i, alias } : i)) )
-  }, [])
+  const updateAlias = useCallback((itemName: string, alias: string) => {
+    saveSelectedValues(values.map((i) => (i.name === itemName ? { ...i, alias } : i)))
+  }, [values, saveSelectedValues])
 
-  const clearAll = useCallback(() => saveSelectedItems([]), [])
+  const clearAll = useCallback(() => saveSelectedValues([]), [])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -223,7 +152,7 @@ export function MultiSelectWithAlias({items, saveValues, nodeId, label, values }
               </li>
             ) : (
               filtered.map((item) => {
-                const isSelected = values.some((i) => i.id === item.id)
+                const isSelected = values.some((i) => i.name === item.name)
                 return (
                   <li
                     key={item.id}
@@ -265,16 +194,16 @@ export function MultiSelectWithAlias({items, saveValues, nodeId, label, values }
               key={item.id}
               className="flex gap-3 px-3 py-2.5 bg-background border border-border rounded-lg"
             >
-              <div className="flex-1 flex flex-col gap-2">
+              <div className="flex-1 flex flex-col gap-2" style={{width: "10px"}}>
                 {/* Item name */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground truncate">
+                  <span  className="text-sm font-medium text-foreground truncate">
                     {item.name}
                   </span>
                   {/* Remove button */}
                   <button
                     type="button"
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => removeItem(item.name)}
                     aria-label={`Remove ${item.name}`}
                     className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
                   >
@@ -286,7 +215,7 @@ export function MultiSelectWithAlias({items, saveValues, nodeId, label, values }
                 <input
                   type="text"
                   value={item.alias}
-                  onChange={(e) => updateAlias(item.id, e.target.value)}
+                  onChange={(e) => updateAlias(item.name, e.target.value)}
                   placeholder="Enter alias..."
                   aria-label={`Alias for ${item.name}`}
                   className="w-full text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground border border-border rounded px-2 py-1"

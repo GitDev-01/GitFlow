@@ -32,11 +32,13 @@ function AppContent() {
 
       const newNodeId = (type === "start")? "start": (type === "end")? "end": `node_${Date.now()}`;
 
+      const newNodeName = type.charAt(0).toUpperCase() + type.slice(1)
+
       const newNode = {
         id: newNodeId,
         type,
         position,
-        data: { name: newNodeId },
+        data: { name: newNodeName },
       };
 
       setNodes((nds) => nds.concat(newNode as any));

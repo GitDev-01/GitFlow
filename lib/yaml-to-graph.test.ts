@@ -30,7 +30,7 @@ routers:
         expect(nodes.find(n => n.id === 'my_agent')).toBeDefined();
 
         // Edges: START -> my_agent, my_agent -> end
-        expect(edges.find(e => e.source === 'START' && e.target === 'my_agent')).toBeDefined();
+        expect(edges.find(e => e.source === 'start' && e.target === 'my_agent')).toBeDefined();
         expect(edges.find(e => e.source === 'my_agent' && e.target === 'end')).toBeDefined();
     });
 });

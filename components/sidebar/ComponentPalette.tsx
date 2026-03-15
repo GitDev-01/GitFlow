@@ -44,7 +44,7 @@ export default function ComponentPalette() {
                     onDragStart={(e) => onDragStart(e, 'start')}
                 >
                     <div className="text-amber-600 font-semibold mb-1 group-hover:text-amber-700">Start Node</div>
-                    <div className="text-xs text-slate-500">Single round AI with built-in retries</div>
+                    <div className="text-xs text-slate-500">The Entrypoint of a Flow</div>
                 </div>
 
                 <div
@@ -53,7 +53,7 @@ export default function ComponentPalette() {
                     onDragStart={(e) => onDragStart(e, 'end')}
                 >
                     <div className="text-amber-600 font-semibold mb-1 group-hover:text-amber-700">End Node</div>
-                    <div className="text-xs text-slate-500">Single round AI with built-in retries</div>
+                    <div className="text-xs text-slate-500">The Endpoint of a Flow</div>
                 </div>
             </div>
 
@@ -63,16 +63,7 @@ export default function ComponentPalette() {
                 onDragStart={(e) => onDragStart(e, 'prompter')}
             >
                 <div className="text-teal-600 font-semibold mb-1 group-hover:text-teal-700">Prompter</div>
-                <div className="text-xs text-slate-500">Executes a single tool without AI</div>
-            </div>
-
-            <div
-                className="bg-white border-2 border-indigo-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group"
-                draggable
-                onDragStart={(e) => onDragStart(e, 'toolbox')}
-            >
-                <div className="text-indigo-600 font-semibold mb-1 group-hover:text-indigo-700">Toolbox</div>
-                <div className="text-xs text-slate-500">Core AI component with LLM and tools</div>
+                <div className="text-xs text-slate-500">Creates prompts used by Agents</div>
             </div>
 
             <div className="mt-auto text-xs text-slate-500 bg-slate-50 p-3 rounded border border-slate-100 italic text-center">

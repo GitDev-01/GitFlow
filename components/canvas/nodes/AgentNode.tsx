@@ -5,7 +5,7 @@ export default function AgentNode({ data }: NodeProps<FlowAppNode>) {
     return (
         <div className="bg-white border-2 border-indigo-500 rounded-lg shadow-md min-w-[150px]">
             <div className="bg-indigo-500 text-white px-3 py-1 rounded-t-sm text-sm font-semibold flex justify-between items-center">
-                <span>{data.name || 'AgentComponent'}</span>
+                <span>{data.name}</span>
             </div>
             <div className="p-3">
                 {data.prompt_id && (

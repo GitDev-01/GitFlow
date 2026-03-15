@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
     ReactFlow,
     Background,
@@ -29,8 +29,16 @@ import StartEndNode from './nodes/StartEndNode';
 import RouterEdge from './edges/RouterEdge';
 import DependencyEdge from './edges/DependencyEdge';
 
+import { useMCP } from '../hooks/mcp';
+import { parseYamlToGraph } from '@/lib/yaml-to-graph';
+import { FlowYamlConfig } from '@/types/flow';
+import yaml from 'js-yaml';
+import { validateEndNodes } from '@/lib/sorting';
+
 export default function FlowCanvas() {
-    const { nodes, edges, setNodes, setEdges, setSelectedNodeId } = useFlowStore();
+    const { nodes, edges, setNodes, setEdges, setSelectedNodeId, setActiveFlow } = useFlowStore();
+
+    const {lastAction, isConnected} = useMCP()
 
     const nodeTypes = useMemo(() => ({
         agentComponent: AgentNode,
@@ -58,7 +66,9 @@ export default function FlowCanvas() {
     );
 
     const onConnect: OnConnect = useCallback(
-        (connection) => setEdges((eds) => addEdge({ ...connection, type: 'router' }, eds)),
+        (connection) => {
+            setEdges((eds) => addEdge({ ...connection, type: 'router' }, eds))
+        },
         [setEdges]
     );
 
@@ -72,6 +82,19 @@ export default function FlowCanvas() {
         },
         [setSelectedNodeId]
     );
+
+    useEffect(()=>{
+    if (lastAction?.type === "YAML_UPDATE") {
+        const { nodes, edges } = parseYamlToGraph(lastAction.data);
+        const config = yaml.load(lastAction.data) as FlowYamlConfig;
+
+        const {updatedNodes, updatedEdges} = validateEndNodes(nodes, edges)
+
+        setNodes(updatedNodes);
+        setEdges(updatedEdges);
+        setActiveFlow(config);
+    }
+    }, [lastAction])
 
     return (
         <div className="w-full h-full bg-slate-50">

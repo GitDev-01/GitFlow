@@ -8,6 +8,7 @@ import { useCallback } from 'react';
 import { FlowAppNode } from '@/types/flow';
 import { sortEdges } from '@/lib/sorting';
 import { MultiSelectWithAlias } from '../use-select/MultiSelectWithAlias';
+import { Textarea } from '../ui/textarea';
 
 
 export default function PropertiesPanel() {
@@ -17,50 +18,49 @@ export default function PropertiesPanel() {
         const inputs = [{id: "1", name: "context:goal"}, {id: "2", name: "context:user_request"}]
         const sortedEdges = sortEdges(edges)
 
-        const availableNodes: FlowAppNode[] = []
+        console.log(sortedEdges)
 
-        for (let i = 0; i < sortedEdges.length; i ++ ) {
-            const edge = sortedEdges[i]
+        const edgeIndex = sortedEdges.findIndex((edge)=>edge.target === selectedNode.id)
+        if (edgeIndex === -1 ) return inputs
 
-            if (selectedNode.id !== edge.source){
-                availableNodes.push(nodes.find((node)=> node.id === edge.source)!)
-            } else {
-                break;
-            }
-        }
+        const nodeIdList = edges.slice(0, edgeIndex+1).map((edge)=>edge.source)
+
+        console.log(nodeIdList)
+
+        const availableNodes: FlowAppNode[] = nodes.filter((node)=>nodeIdList.includes(node.id))
 
         let index = 3;
         availableNodes.forEach((node)=>{
 
             if (node.type === "agentComponent"){
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Final Answer"})
+                inputs.push({id: (""+index), name: "context:"+ (node.data.name ?? node.id)+ ".final_answer"})
                 index++;
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Conversation History"})
+                inputs.push({id: (""+index), name: "conversation_history:"+ (node.data.name ?? node.id)})
                 index++;
                 inputs.push({id: (""+index), name: "status"})
                 index++;
             } else if (node.type === "deterministicComponent") {
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Tool Responses"})
+                inputs.push({id: (""+index), name: "context:"+ (node.data.name ?? node.id)+ ".tool_responses"})
                 index++;
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Error"})
+                inputs.push({id: (""+index), name: "context:"+ (node.data.name ?? node.id)+ ".error"})
                 index++;
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Execution Result"})
+                inputs.push({id: (""+index), name: "context:"+ (node.data.name ?? node.id)+ ".execution_result"})
                 index++;
             } else if (node.type === "oneOffComponent") {
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Tool Responses"})
+                inputs.push({id: (""+index), name: "context:"+ (node.data.name ?? node.id)+ ".tool_responses"})
                 index++;
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Tool Calls"})
+                inputs.push({id: (""+index), name: "context:"+ (node.data.name ?? node.id)+ ".tool_calls"})
                 index++;
-                inputs.push({id: (""+index), name: (node.data.name ?? node.id)+ " - Execution Result"})
+                inputs.push({id: (""+index), name: "context:"+ (node.data.name ?? node.id)+ ".execution_result"})
                 index++;    
-                inputs.push({id: (""+index), name: "UI Chat Log"})
+                inputs.push({id: (""+index), name: "ui_chat_log"})
                 index++;
-                inputs.push({id: (""+index), name: "Conversation History"})
+                inputs.push({id: (""+index), name: "conversation_history:"+ (node.data.name ?? node.id)})
                 index++;
             }
         })
         return inputs
-    }, [])
+    }, [nodes, edges])
 
     if (!selectedNodeId) {
         return (
@@ -88,6 +88,7 @@ export default function PropertiesPanel() {
                     <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Component Name / ID</label>
                         <input
+                            spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
                             value={selectedNode.data.name || ''}
                             onChange={(e) => updateNodeData(selectedNodeId, { name: e.target.value })}
@@ -101,6 +102,7 @@ export default function PropertiesPanel() {
                     <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Prompt ID</label>
                         <input
+                            spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
                             value={selectedNode.data.prompt_id || ''}
                             onChange={(e) => updateNodeData(selectedNodeId, { prompt_id: e.target.value })}
@@ -114,6 +116,7 @@ export default function PropertiesPanel() {
                     <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Prompt Version</label>
                         <input
+                            spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
                             value={selectedNode.data.prompt_version || ""}
                             onChange={(e) => updateNodeData(selectedNodeId, { prompt_version: e.target.value })}
@@ -122,48 +125,122 @@ export default function PropertiesPanel() {
                     </div>
                 )}
 
-                {/* Toolset */}
-                {['agentComponent', 'oneOffComponent',].includes(selectedNode.type as string) && (
-                    <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Toolset</label>
-                        <MultiSelect items={agentTools} saveItems={updateNodeData} nodeId={selectedNodeId} label={"toolset"}/>
-                    </div>
-                )}
-
-                {/* UI Log Events */}
-                {['agentComponent', 'oneOffComponent'].includes(selectedNode.type as string) && (
-                    <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">UI Log Events</label>
-                        <MultiSelect items={(selectedNode.type === "agentComponent")? agentUILogEvent: oneOffUILogEvent} saveItems={updateNodeData} nodeId={selectedNodeId} label={"ui_log_events"}/>
-                    </div>
-                )}
-
-                {/* Input */}
-                {['agentComponent', 'oneOffComponent'].includes(selectedNode.type as string) && (
-                    <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Input</label>
-                        <MultiSelectWithAlias items={getNodeInputList(selectedNode)} saveItems={updateNodeData} nodeId={selectedNodeId} label={"inputs"}/>
-                    </div>
-                )}
-
-                {/* UI Role As */}
-                {['agentComponent', 'oneOffComponent',].includes(selectedNode.type as string) && (
-                    <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">UI Role as</label>
-                        <SingleSelect items={["agent", "tool"]} label={"ui_role_as"} saveValue={updateNodeData} selectedNodeId={selectedNodeId}/>
-                    </div>
-                )}
-
                 {/* Tool Name */}
                 {selectedNode.type === 'deterministicComponent' && (
                     <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Tool Name</label>
                         <input
-                            className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all"
-                            value={selectedNode.data.tool_name || ''}
+                            spellCheck="false"
+                            className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
+                            value={selectedNode.data.tool_name || ""}
                             onChange={(e) => updateNodeData(selectedNodeId, { tool_name: e.target.value })}
                             placeholder="e.g. read_file"
+                        />                    
+                    </div>
+                )}
+
+                {/* Single Toolset */}
+                {selectedNode.type === 'deterministicComponent' && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Toolset</label>
+                        <SingleSelect items={agentTools.map((tool)=>{return tool.name})} saveValue={updateNodeData} label="toolset" value={(selectedNode.data.toolset)?selectedNode.data.toolset[0]: ""} selectedNodeId={selectedNodeId} selectedNode={selectedNode}/>                   
+                    </div>
+                )}
+
+                {/* Toolset */}
+                {['agentComponent', 'oneOffComponent',].includes(selectedNode.type as string) && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Toolset</label>
+                        <MultiSelect items={agentTools} saveValues={updateNodeData} nodeId={selectedNodeId} label={"toolset"} values={selectedNode.data.toolset || []}/>
+                    </div>
+                )}
+
+                {/* UI Log Events */}
+                {['agentComponent', 'deterministicComponent', 'oneOffComponent'].includes(selectedNode.type as string) && (
+
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">UI Log Events</label>
+                        <MultiSelect items={(selectedNode.type === "agentComponent")? agentUILogEvent: oneOffUILogEvent} saveValues={updateNodeData} nodeId={selectedNode.id} label={"ui_log_events"} values={selectedNode.data.ui_log_events || []}/>
+                    </div>
+                )}
+
+                {/* Inputs */}
+                {['agentComponent', 'deterministicComponent', 'oneOffComponent'].includes(selectedNode.type as string) && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Inputs</label>
+                        <MultiSelectWithAlias items={getNodeInputList(selectedNode)} saveValues={updateNodeData} nodeId={selectedNodeId} label={"inputs"} values={selectedNode.data.inputs?.map((item, index)=> ( {id: ""+index, name: item.from, alias: item.as}))|| []}/>
+                    </div>
+                )}
+
+                {/* UI Role As */}
+                {['agentComponent', 'deterministicComponent', 'oneOffComponent',].includes(selectedNode.type as string) && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">UI Role as</label>
+                        <SingleSelect items={["agent", "tool"]} label={"ui_role_as"} saveValue={updateNodeData} selectedNodeId={selectedNodeId} value={selectedNode.data.ui_role_as || ''}/>
+                    </div>
+                )}
+
+                {/* Max Correct Attempts */}
+                {selectedNode.type === 'oneOffComponent' && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Max Correct Attempts</label>
+                        <input
+                            type='number'
+                            className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
+                            value={selectedNode.data.max_correction_attempts || 0}
+                            onChange={(e) => updateNodeData(selectedNodeId, { max_correction_attempts: parseInt(e.target.value, 10) })}
+                            placeholder="2"
+                        />                    
+                    </div>
+                )}
+
+                {/* System Prompt */}
+                {selectedNode.type === 'prompter' && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">System</label>
+                        <Textarea
+                            spellCheck="false"
+                            className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all"
+                            value={selectedNode.data.prompt_template?.system || ''}
+                            onChange={(e) => updateNodeData(selectedNodeId, { prompt_template: {...selectedNode.data.prompt_template, system: e.target.value } })}
+                            placeholder="e.g. read_file"
                         />
+                    </div>
+                )}
+
+                {/* User Prompt */}
+                {selectedNode.type === 'prompter' && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">User</label>
+                        <Textarea
+                            spellCheck="false"
+                            className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all"
+                            value={selectedNode.data.prompt_template?.user || ''}
+                            onChange={(e) => updateNodeData(selectedNodeId, { prompt_template: {...selectedNode.data.prompt_template, user: e.target.value } })}
+                            placeholder="e.g. read_file"
+                        />
+                    </div>
+                )}
+
+                {/* Placeholder */}
+                {selectedNode.type === 'prompter' && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Placeholder</label>
+                        <SingleSelect items={["history"]} saveValue={updateNodeData} label='placeholder' selectedNodeId={selectedNodeId} value={selectedNode.data.prompt_template?.placeholder || ''} selectedNode={selectedNode}/>
+                    </div>
+                )}
+
+                {/* Timeout */}
+                {selectedNode.type === 'prompter' && (
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Timeout</label>
+                        <input
+                            type='number'
+                            className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
+                            value={selectedNode.data.prompt_params?.timeout || ""}
+                            onChange={(e) => updateNodeData(selectedNodeId, { prompt_params: {timeout: parseInt(e.target.value, 10) }})}
+                            placeholder="180"
+                        />                    
                     </div>
                 )}
 
