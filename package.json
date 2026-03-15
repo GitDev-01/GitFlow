@@ -16,6 +16,7 @@
     "clsx": "^2.1.1",
     "js-yaml": "^4.1.1",
     "lucide-react": "^0.577.0",
+    "mcp-handler": "^1.0.7",
     "next": "16.1.6",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",

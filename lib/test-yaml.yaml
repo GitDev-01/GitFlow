@@ -1,0 +1,57 @@
+version: "v1"
+environment: ambient
+
+components:
+    - name: "code_analyzer"
+      type: AgentComponent
+      prompt_id: "code_review_prompt"
+      # prompt_version omitted - uses local prompt
+      ui_log_events: ["on_agent_final_answer"]
+      inputs:
+        - from: context:goal
+          as: mr_link
+      toolset: ["read_file", "list_dir"]
+
+    - name: "error_handler"
+      type: AgentComponent
+      prompt_id: "code_review_prompt"
+      # prompt_version omitted - uses local prompt
+      ui_log_events: ["on_agent_final_answer"]
+      inputs:
+        - from: context:goal
+          as: mr_link
+      toolset: ["read_file", "list_dir"]
+
+    - name: "code_reviewer"
+      type: AgentComponent
+      prompt_id: "code_review_prompt"
+      # prompt_version omitted - uses local prompt
+      ui_log_events: ["on_agent_final_answer"]
+      inputs:
+        - from: context:goal
+          as: mr_link
+      toolset: ["read_file", "list_dir"]
+
+prompts:
+    - prompt_id: "code_review_prompt"
+      prompt_template:
+          system: "You are a experience software developer, your role is to conduct through code review and mentor other engineers on best practices and patterns."
+          user: "Please conduct code review for merge request at: {{mr_link}}"
+          placeholder: history  # Optional: include conversation history
+      params:
+          timeout: 180
+
+routers:
+    - from: "code_analyzer"
+      condition:
+          input: "context:file_processor.execution_result"
+          routes:
+              "success": "code_reviewer"
+              "failed": "error_handler"
+    - from: code_reviewer
+      to: end
+    - from: error_handler
+      to: end
+
+flow:
+    entry_point: "code_analyzer"

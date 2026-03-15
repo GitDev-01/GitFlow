@@ -29,17 +29,20 @@ export function parseGraphToYaml(
             };
 
             if (prompt_id) compBase.prompt_id = prompt_id;
-            if (prompt_version !== undefined && prompt_version !== null) compBase.prompt_version = prompt_version;
-            if (toolset && toolset.length > 0) compBase.toolset = toolset;
+            if (prompt_version !== undefined && prompt_version !== null && prompt_version !== '') compBase.prompt_version = prompt_version;
+            if (toolset && toolset.length > 0 && toolset[0] !== "null") compBase.toolset = toolset;
             if (tool_name) compBase.tool_name = tool_name;
             if (inputs && inputs.length > 0) compBase.inputs = inputs;
             if (ui_log_events && ui_log_events.length > 0) compBase.ui_log_events = ui_log_events;
-            if (ui_role_as && ui_role_as !== "none") compBase.ui_role_as = ui_role_as;
+            if (ui_role_as && ui_role_as !== "null") compBase.ui_role_as = ui_role_as;
             if (max_correction_attempts !== undefined) compBase.max_correction_attempts = max_correction_attempts;
 
             components.push(compBase as AnyComponent);
-        } else if (node.type === 'prompter' && node.data.isLocalPrompt) {
+        } else if (node.type === 'prompter') {
             if (node.data.prompt_id && node.data.prompt_template) {
+                
+                if (node.data.prompt_template.placeholder === "null") delete node.data.prompt_template.placeholder
+
                 prompts.push({
                     prompt_id: node.data.prompt_id,
                     prompt_template: node.data.prompt_template,
@@ -56,16 +59,19 @@ export function parseGraphToYaml(
     // Edges need to be sorted for routing
     const sortedEdges: Edge[] = sortEdges(edges)
 
+    console.log(sortedEdges)
+
     sortedEdges.forEach(edge => {
         if (edge.type === 'dependency') return;
 
-        if (edge.source === 'START') {
+        if (edge.source === 'start') {
             entryPoint = edge.target;
         } else {
             if (!edgesBySource[edge.source]) edgesBySource[edge.source] = [];
             edgesBySource[edge.source].push(edge);
         }
     });
+
 
     Object.entries(edgesBySource).forEach(([source, sourceEdges]) => {
         // Check if it's a simple route or conditional
