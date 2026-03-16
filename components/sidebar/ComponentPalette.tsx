@@ -10,9 +10,10 @@ export default function ComponentPalette() {
         <div className="p-4 border-r border-slate-200 bg-white shadow-sm flex flex-col gap-4 w-64 h-full z-10">
             <h2 className="text-lg font-bold text-slate-800">Components</h2>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3" style={{height: "90%"}}>
                 <div
                     className="bg-white border-2 border-indigo-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group"
+                    style={{height: "20%"}}
                     draggable
                     onDragStart={(e) => onDragStart(e, 'agentComponent')}
                 >
@@ -21,7 +22,8 @@ export default function ComponentPalette() {
                 </div>
 
                 <div
-                    className="bg-white border-2 border-teal-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group"
+                    className="bg-white border-2 border-teal-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group basis-1/5"
+                    style={{height: "20%"}}
                     draggable
                     onDragStart={(e) => onDragStart(e, 'deterministicComponent')}
                 >
@@ -30,7 +32,8 @@ export default function ComponentPalette() {
                 </div>
 
                 <div
-                    className="bg-white border-2 border-amber-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group"
+                    className="bg-white border-2 border-amber-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group basis-1/5"
+                    style={{height: "20%"}}
                     draggable
                     onDragStart={(e) => onDragStart(e, 'oneOffComponent')}
                 >
@@ -39,7 +42,8 @@ export default function ComponentPalette() {
                 </div>
 
                 <div
-                    className="bg-white border-2 border-amber-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group"
+                    className="bg-white border-2 border-amber-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group basis-1/5"
+                    style={{height: "20%"}}
                     draggable
                     onDragStart={(e) => onDragStart(e, 'start')}
                 >
@@ -48,25 +52,27 @@ export default function ComponentPalette() {
                 </div>
 
                 <div
-                    className="bg-white border-2 border-amber-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group"
+                    className="bg-white border-2 border-amber-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group basis-1/5"
+                    style={{height: "20%"}}
                     draggable
                     onDragStart={(e) => onDragStart(e, 'end')}
                 >
                     <div className="text-amber-600 font-semibold mb-1 group-hover:text-amber-700">End Node</div>
                     <div className="text-xs text-slate-500">The Endpoint of a Flow</div>
                 </div>
+
+                <div
+                    className="bg-white border-2 border-teal-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group basis-1/5"
+                    style={{height: "20%"}}
+                    draggable
+                    onDragStart={(e) => onDragStart(e, 'prompter')}
+                >
+                    <div className="text-teal-600 font-semibold mb-1 group-hover:text-teal-700">Prompter</div>
+                    <div className="text-xs text-slate-500">Creates prompts used by Agents</div>
+                </div>
             </div>
 
-            <div
-                className="bg-white border-2 border-teal-500 rounded p-3 cursor-grab hover:shadow-md transition-shadow group"
-                draggable
-                onDragStart={(e) => onDragStart(e, 'prompter')}
-            >
-                <div className="text-teal-600 font-semibold mb-1 group-hover:text-teal-700">Prompter</div>
-                <div className="text-xs text-slate-500">Creates prompts used by Agents</div>
-            </div>
-
-            <div className="mt-auto text-xs text-slate-500 bg-slate-50 p-3 rounded border border-slate-100 italic text-center">
+            <div className=" mt-auto text-xs text-slate-500 bg-slate-50 p-3 rounded border border-slate-100 italic text-center" style={{height: "10%"}}>
                 Drag components onto the canvas to add them to your flow.
             </div>
         </div>
