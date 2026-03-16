@@ -7,6 +7,7 @@ import ComponentPalette from '@/components/sidebar/ComponentPalette';
 import PropertiesPanel from '@/components/panels/PropertiesPanel';
 import Toolbar from '@/components/toolbar/Toolbar';
 import { useFlowStore } from '@/store/flow-store';
+import { toast } from 'sonner';
 
 function AppContent() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -32,7 +33,14 @@ function AppContent() {
 
       const newNodeId = (type === "start")? "start": (type === "end")? "end": `node_${Date.now()}`;
 
-      const newNodeName = type.charAt(0).toUpperCase() + type.slice(1)
+      const newNodeName = (type === "start")? "start": (type === "end")? "end": type.charAt(0).toUpperCase() + type.slice(1)
+
+      if (nodes.length == 1 && nodes[0].id !== "start") toast.info("We'd recommend Start -> Component -> end.", {description: "", position: "top-center"})
+
+      if (nodes.some((n)=>{
+        console.log(n, n.data.name === newNodeName)
+        return n.data.name === newNodeName
+      })) toast.warning("You might want to change the component name!", {description: "GitLab flows require each component to be unique", position: "top-center"})
 
       const newNode = {
         id: newNodeId,
