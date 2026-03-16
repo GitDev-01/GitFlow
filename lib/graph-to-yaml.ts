@@ -59,16 +59,15 @@ export function parseGraphToYaml(
     // Edges need to be sorted for routing
     const sortedEdges: Edge[] = sortEdges(edges)
 
-    console.log(sortedEdges)
-
     sortedEdges.forEach(edge => {
         if (edge.type === 'dependency') return;
 
-        if (edge.source === 'start') {
-            entryPoint = edge.target;
-        } else {
+
+        if (edge.source === "start"){
+            entryPoint = nodeNameIndex[edge.target];   
+        } else  {
             if (!edgesBySource[edge.source]) edgesBySource[edge.source] = [];
-            edgesBySource[edge.source].push(edge);
+            edgesBySource[edge.source].push(edge); 
         }
     });
 
@@ -80,17 +79,17 @@ export function parseGraphToYaml(
 
         if (conditionalEdges.length > 0) {
             // It's a conditional router
-            const conditionInput = conditionalEdges[0].data?.condition_input as string || `context:${source}.execution_result`;
+            const conditionInput = `context:${nodeNameIndex[source]}.execution_result`;
             const routes: Record<string, string> = {};
 
             conditionalEdges.forEach(e => {
                 if (e.label && typeof e.label === 'string') {
-                    routes[e.label] = e.target;
+                    routes[e.label] = nodeNameIndex[e.target];
                 }
             });
 
             routers.push({
-                from: source,
+                from: nodeNameIndex[source],
                 condition: {
                     input: conditionInput,
                     routes
