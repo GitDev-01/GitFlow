@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFlowStore } from '@/store/flow-store';
 import { parseGraphToYaml } from '@/lib/graph-to-yaml';
-import { Download, Copy, Upload } from 'lucide-react';
+import { Download, Copy, Upload, CheckIcon } from 'lucide-react';
 import YamlImportDialog from '../shared/YamlImportDialog';
 
 export default function Toolbar() {
@@ -11,6 +11,8 @@ export default function Toolbar() {
     const [showExportModal, setShowExportModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [yamlOutput, setYamlOutput] = useState('');
+
+    const [isCopied, setIsCoppied] = useState(false)
 
     const handleExport = () => {
         try {
@@ -24,6 +26,8 @@ export default function Toolbar() {
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(yamlOutput);
+        setIsCoppied(true);
+        setTimeout(()=>setIsCoppied(false), 3000)
     };
 
     return (
@@ -60,7 +64,7 @@ export default function Toolbar() {
                                 className="absolute top-2 right-2 p-2 bg-white rounded shadow-sm border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors"
                                 title="Copy to clipboard"
                             >
-                                <Copy size={16} />
+                                {!isCopied ? <Copy size={16} /> : <CheckIcon size={16} />}
                             </button>
                         </div>
                         <div className="flex justify-end gap-3 mt-5">
