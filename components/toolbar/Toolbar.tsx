@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFlowStore } from '@/store/flow-store';
 import { parseGraphToYaml } from '@/lib/graph-to-yaml';
 import { Download, Copy, Upload, CheckIcon } from 'lucide-react';
@@ -13,6 +13,7 @@ export default function Toolbar() {
     const [yamlOutput, setYamlOutput] = useState('');
 
     const [isCopied, setIsCoppied] = useState(false)
+    const timeout = useRef<any>(0)
 
     const handleExport = () => {
         try {
@@ -25,9 +26,11 @@ export default function Toolbar() {
     };
 
     const copyToClipboard = () => {
+        if (timeout.current) clearTimeout(timeout.current)
+
         navigator.clipboard.writeText(yamlOutput);
         setIsCoppied(true);
-        setTimeout(()=>setIsCoppied(false), 3000)
+        timeout.current = setTimeout(()=>setIsCoppied(false), 3000)
     };
 
     return (
