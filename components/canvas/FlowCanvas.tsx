@@ -15,7 +15,8 @@ import {
     OnSelectionChangeParams,
     type OnNodesChange,
     type OnEdgesChange,
-    type OnConnect
+    type OnConnect,
+    Edge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -31,9 +32,11 @@ import DependencyEdge from './edges/DependencyEdge';
 
 import { useMCP } from '../hooks/mcp';
 import { parseYamlToGraph } from '@/lib/yaml-to-graph';
-import { FlowYamlConfig } from '@/types/flow';
+import { FlowAppNode, FlowYamlConfig } from '@/types/flow';
 import yaml from 'js-yaml';
 import { validateEndNodes } from '@/lib/sorting';
+
+import {toast} from 'sonner'
 
 export default function FlowCanvas() {
     const { nodes, edges, setNodes, setEdges, setSelectedNodeId, setActiveFlow } = useFlowStore();
@@ -65,11 +68,128 @@ export default function FlowCanvas() {
         [setEdges]
     );
 
-    const onConnect: OnConnect = useCallback(
-        (connection) => {
-            setEdges((eds) => addEdge({ ...connection, type: 'router' }, eds))
+    const onConnect = useCallback((connection: Connection) => {
+        setEdges((prevEdges) => {
+            const existingSourceEdges = prevEdges.filter(
+                (edge) => edge.source === connection.source
+            );
+
+            if (existingSourceEdges.length >= 2) {
+                toast.warning("A node can only have two outgoing routes.", {description: "Routes types are Single or Conditional", position: "top-center"});
+            }
+
+            // Block if source already has 2 or more edges
+            if (existingSourceEdges.length >= 2) return prevEdges;
+
+            const existingEdge = existingSourceEdges[0];
+
+            // No conflict — add a plain edge
+            if (!existingEdge) {
+                const newEdge: Edge = {
+                    type: "router",
+                    id: `e-${connection.source}-${connection.target}`,
+                    source: connection.source!,
+                    target: connection.target!,
+                };
+                return [...prevEdges, newEdge];
+            }
+
+            if (connection.source === "start") {
+                toast.warning("Start nodes have one outgoing route.", {description: "GitLab Flows only allow 1 entry component", position: "top-center"});
+                return prevEdges;
+            }
+
+            const sourceName = nodes.find((n)=>connection.source===n.id)?.data.name
+
+            // Conflict — upgrade both edges to conditional
+            const updatedExistingEdge: Edge = {
+                ...existingEdge,
+                type: "router",
+                label: "success",
+                data: {
+                    ...existingEdge.data,
+                    condition_input: `context:${sourceName}.execution_result`,
+                    route_value: "success"
+                },
+            };
+
+            const newConditionalEdge: Edge = {
+                type: "router",
+                id: `e-${connection.source}-${connection.target}`,
+                source: connection.source!,
+                target: connection.target!,
+                label: "failed",
+                data: {
+                    condition_input: `context:${sourceName}.execution_result`,
+                    route_value: "failed"
+                },
+            };
+
+            return [
+                ...prevEdges.filter((edge) => edge.id !== existingEdge.id),
+                updatedExistingEdge,
+                newConditionalEdge,
+            ];
+        });
+    }, [setEdges]);
+
+    const onBeforeDelete = useCallback(
+        async ({ nodes, edges }: { nodes: FlowAppNode[]; edges: Edge[] }) => {
+            setEdges((prevEdges) => {
+                const deletedNodeIds = new Set(nodes.map((n) => n.id));
+
+                // Collect all edges being removed — explicitly deleted ones
+                // plus any connected to a deleted node
+                const edgesToRemove = new Set(
+                    prevEdges
+                        .filter(
+                            (edge) =>
+                                edges.some((e) => e.id === edge.id) ||
+                                deletedNodeIds.has(edge.source) ||
+                                deletedNodeIds.has(edge.target)
+                        )
+                        .map((e) => e.id)
+                );
+
+                // Downgrade any surviving sibling conditional edges
+                let updatedEdges = prevEdges.map((edge) => {
+                    if (edgesToRemove.has(edge.id)) return edge;
+
+                    const isConditional = !!edge.data?.route_value;
+                    if (!isConditional) return edge;
+
+                    // Check if this edge's conditional sibling is being removed
+                    const sibling = prevEdges.find(
+                        (e) =>
+                            e.source === edge.source &&
+                            e.id !== edge.id &&
+                            edgesToRemove.has(e.id)
+                    );
+
+                    if (!sibling) return edge;
+
+                    return {
+                        ...edge,
+                        label: undefined,
+                        data: {
+                            ...edge.data,
+                            input: undefined,
+                            route_value: undefined,
+                        },
+                    };
+                });
+
+                return updatedEdges.filter((edge) => !edgesToRemove.has(edge.id));
+            });
+
+            setNodes((prevNodes) => {
+                const deletedNodeIds = new Set(nodes.map((n) => n.id));
+                return prevNodes.filter((node) => !deletedNodeIds.has(node.id));
+            });
+
+            return false;
         },
-        [setEdges]
+        [setEdges, setNodes]
     );
 
     const onSelectionChange = useCallback(
@@ -104,6 +224,7 @@ export default function FlowCanvas() {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
+                onBeforeDelete={onBeforeDelete}
                 onSelectionChange={onSelectionChange}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
