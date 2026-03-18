@@ -41,11 +41,13 @@ export function parseGraphToYaml(
         } else if (node.type === 'prompter') {
             if (node.data.prompt_id && node.data.prompt_template) {
                 
-                if (node.data.prompt_template.placeholder === "null") delete node.data.prompt_template.placeholder
+                if (node.data.prompt_template.placeholder === "null" || !node.data.prompt_template.placeholder) delete node.data.prompt_template.placeholder
 
                 prompts.push({
                     prompt_id: node.data.prompt_id,
+                    name: node.data.name,
                     prompt_template: node.data.prompt_template,
+                    unit_primitives: [],
                     ...(node.data.prompt_params ? { params: node.data.prompt_params } : {})
                 });
             }

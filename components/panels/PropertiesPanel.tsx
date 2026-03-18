@@ -10,6 +10,8 @@ import { sortEdges } from '@/lib/sorting';
 import { MultiSelectWithAlias } from '../use-select/MultiSelectWithAlias';
 import { Textarea } from '../ui/textarea';
 import { Edge } from '@xyflow/react';
+import { UseTooltip } from '../use-tooltip/InfoTooltip';
+import { Info } from 'lucide-react';
 
 export default function PropertiesPanel() {    
     const { selectedNodeId, nodes, edges, updateNodeData } = useFlowStore(
@@ -44,9 +46,7 @@ export default function PropertiesPanel() {
         return nodes.find(n => n.id === selectedNodeId) || null;
     }, [nodes, selectedNodeId]);
 
-    const getNodeInputList = useCallback((selectedNode: FlowAppNode) => {
-        console.log("getNodeInputList CALLED");
-        
+    const getNodeInputList = useCallback((selectedNode: FlowAppNode) => {        
         const inputs = [{id: "1", name: "context:goal"}, {id: "2", name: "context:user_request"}]
         
         const sortedEdges = sortEdges(edges)
@@ -110,9 +110,9 @@ export default function PropertiesPanel() {
 
             <div className="p-4 flex flex-col gap-5">
                 {/* Name Input */}
-                {['agentComponent', 'deterministicComponent', 'oneOffComponent'].includes(selectedNode.type as string) && (
+                {['agentComponent', 'deterministicComponent', 'oneOffComponent', 'prompter'].includes(selectedNode.type as string) && (
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Component Name / ID</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Component Name / ID <span className=' lowercase text-sm text-slate-400'>(required)</span></label>
                         <input
                             spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
@@ -126,7 +126,11 @@ export default function PropertiesPanel() {
                 {/* Prompt ID */}
                 {['agentComponent', 'oneOffComponent', 'prompter'].includes(selectedNode.type as string) && (
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Prompt ID</label>
+                        <label className="flex flex-row items-center gap-1 block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">
+                            Prompt ID 
+                             <span className=' lowercase text-sm text-slate-400'> (required)</span> 
+                            {selectedNode.type !== "prompter" && <UseTooltip trigger={<Info size={15} />} text="Requires a Prompter with the same ID"/>} 
+                        </label>
                         <input
                             spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
@@ -154,7 +158,7 @@ export default function PropertiesPanel() {
                 {/* Tool Name */}
                 {selectedNode.type === 'deterministicComponent' && (
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Tool Name</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Tool Name <span className=' lowercase text-sm text-slate-400'>(required)</span></label>
                         <input
                             spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
@@ -176,7 +180,7 @@ export default function PropertiesPanel() {
                 {/* Toolset */}
                 {['agentComponent', 'oneOffComponent',].includes(selectedNode.type as string) && (
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Toolset</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">Toolset {(selectedNode.type === "oneOffComponent") && <span className=' lowercase text-sm text-slate-400'>(required)</span>}</label>
                         <MultiSelect items={agentTools} saveValues={updateNodeData} nodeId={selectedNode.id} label={"toolset"} values={selectedNode.data.toolset || []}/>
                     </div>
                 )}
@@ -223,7 +227,7 @@ export default function PropertiesPanel() {
                 {/* System Prompt */}
                 {selectedNode.type === 'prompter' && (
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">System</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">System <span className=' lowercase text-sm text-slate-400'>(required)</span></label>
                         <Textarea
                             spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all"
@@ -237,7 +241,7 @@ export default function PropertiesPanel() {
                 {/* User Prompt */}
                 {selectedNode.type === 'prompter' && (
                     <div>
-                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">User</label>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wide">User <span className=' lowercase text-sm text-slate-400'>(required)</span></label>
                         <Textarea
                             spellCheck="false"
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition-all"

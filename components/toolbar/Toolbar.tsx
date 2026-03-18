@@ -62,6 +62,7 @@ export default function Toolbar() {
                             <pre className="w-full h-80 p-4 border border-slate-300 rounded font-mono text-xs overflow-auto bg-slate-50 text-slate-700">
                                 {yamlOutput}
                             </pre>
+                            <span className='text-sm text-slate-700'>Make sure all required fields are filled</span>
                             <button
                                 onClick={copyToClipboard}
                                 className="absolute top-2 right-2 p-2 bg-white rounded shadow-sm border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors"

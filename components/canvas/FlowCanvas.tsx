@@ -38,6 +38,15 @@ import { validateEndNodes } from '@/lib/sorting';
 
 import {toast} from 'sonner'
 
+import { Silkscreen } from 'next/font/google';
+
+const slikscreen = Silkscreen({
+  weight: "400",
+  fallback: ["arial"],
+  variable: "--nunito",
+  subsets: ["latin"]
+})
+
 export default function FlowCanvas() {
     const { nodes, edges, setNodes, setEdges, setSelectedNodeId, setActiveFlow } = useFlowStore();
 
@@ -59,7 +68,7 @@ export default function FlowCanvas() {
     }), []);
 
     const onNodesChange: OnNodesChange = useCallback(
-        (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
+        (changes) => setNodes((nds) => applyNodeChanges(changes, nds) as FlowAppNode[]),
         [setNodes]
     );
 
@@ -234,6 +243,16 @@ export default function FlowCanvas() {
                 <Controls />
                 <MiniMap zoomable pannable nodeClassName={(node) => `bg-gray-200`} />
             </ReactFlow>
+
+            {/* Add empty state overlay here */}
+            {nodes.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <div className="text-center text-gray-400">
+                        <p className={`text-9xl font-medium ${slikscreen.className}` }>Git Flow</p>
+                        <p className="text-xl">Drag components to start your flow!!</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
