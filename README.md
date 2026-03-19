@@ -21,14 +21,45 @@
 - npm package manager
 - A code editor or terminal.
 
-## 2-step start
+## 1-step start
+1. Visit [GitFlow (not updated)](http://localhost:3000) to start creating your flow.
+
+## 2-step start (local)
 
 1. Clone and cd into the repo
 
 2. Enter the command  below
     ```bash
-    > flow # installs dependencies -> builds project -> starts server.
+    > npm run flow # installs dependencies -> builds project -> starts server.
     ```
-
 Open [http://localhost:3000](http://localhost:3000) with your browser and your done!!
 
+## MCP Support
+The GitFlow MCP Server allows Gitlab Agents - specifically the "GitFlow Yaml Agent" - to visualise flows
+directly from the IDE.
+
+The GitFlow Agent can be found here: [GitFlow Yaml Agent (not updated)](http://localhost:3000)
+
+**Note: This only works locally and not in the Gitlab Web IDE (A public server is in the works) 🛠**
+
+### Usage
+
+The MCP server starts automatically with the web app.
+
+Follow the [Gitlab Duo MCP Client Guide](https://docs.gitlab.com/user/gitlab_duo/model_context_protocol/mcp_clients) 
+to add the server to your IDE/Code Editor
+
+Server Configuration:
+```json
+{
+  "mcpServers": {
+    "flow-yaml-visualiser": {
+      "type": "http",
+      "url": "http://localhost:3000/api/gitflow/mcp",
+      "approvedTools": true # Only 1 tool
+    }
+  }
+}
+```
+
+Thanks for stopping by, don't forget to like and subscribe. [Devpost](https://devpost.com/software/gitflow)
