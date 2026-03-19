@@ -22,7 +22,7 @@
 - A code editor or terminal.
 
 ## 1-step start
-1. Visit [GitFlow (not updated)](http://localhost:3000) to start creating your flow.
+1. Visit [GitFlow](https://gitflow-dev.vercel.app/) to start creating your flow.
 
 ## 2-step start (local)
 
@@ -38,7 +38,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser and your d
 The GitFlow MCP Server allows Gitlab Agents - specifically the "GitFlow Yaml Agent" - to visualise flows
 directly from the IDE.
 
-The GitFlow Agent can be found here: [GitFlow Yaml Agent (not updated)](http://localhost:3000)
+To access the GitFlow Yaml Agent use the GitLab AI Catalog.
 
 **Note: This only works locally and not in the Gitlab Web IDE (A public server is in the works) 🛠**
 
@@ -62,4 +62,12 @@ Server Configuration:
 }
 ```
 
-Thanks for stopping by, don't forget to like and subscribe. [Devpost](https://devpost.com/software/gitflow)
+## Troubleshooting
+If `npm run flow` encounters an error, build the project manually.
+```bash
+npm install
+npm run build
+npm start
+```
+
+Thanks for stopping by!. Don't forget to like and subscribe. [Devpost](https://devpost.com/software/gitflow)
