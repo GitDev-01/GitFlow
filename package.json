@@ -1,9 +1,10 @@
 {
-  "name": "flowvisualiser",
+  "name": "gitflow",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "clean-build": "rm -r .next && npm run build",
+    "flow": "npm install && npm run build && npm start",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
