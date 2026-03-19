@@ -1,11 +1,10 @@
 
-<img src="public/gitflow-banner.jpeg" width="100%" height="200px"/>
+<img src="public/gitflow-banner.jpeg" width="100%" height="200px" style="border: 1px solid #4f4f4f; border-radius: 5px;"/>
 
 <h1 style="text-align: center" width="100%"> A visual editor for GitLab Duo workflows </h1>
 <br />
 
-
-<img src="public/gitflow-usage.png" width="100%" height="350px"/>
+<img src="public/gitflow-usage.png" width="100%" height="350px" style="border: 3px solid #4f4f4f; border-radius: 10px;"/>
 
 ## Features
 
