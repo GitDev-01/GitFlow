@@ -217,7 +217,7 @@ export default function PropertiesPanel() {
                         <input
                             type='number'
                             className="w-full text-sm p-2 bg-white border border-slate-300 rounded shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all"
-                            value={selectedNode.data.max_correction_attempts || 0}
+                            value={selectedNode.data.max_correction_attempts || ""}
                             onChange={(e) => updateNodeData(selectedNode.id, { max_correction_attempts: parseInt(e.target.value, 10) })}
                             placeholder="2"
                         />                    
