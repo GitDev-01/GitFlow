@@ -65,3 +65,12 @@ export const validateEndNodes = (nodes: FlowAppNode[], edges: Edge[]): { updated
 
     return { updatedNodes, updatedEdges };
 };
+
+export const validateStartNode = (nodes: FlowAppNode[]) => {
+    for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === "start"){
+            return true;
+        }
+    }
+    return false;
+}

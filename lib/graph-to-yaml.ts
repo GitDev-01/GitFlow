@@ -1,7 +1,8 @@
 import yaml from 'js-yaml';
 import { FlowYamlConfig, FlowAppNode, AnyComponent, LocalPrompt, RouterConfig } from '@/types/flow';
 import { Edge } from '@xyflow/react';
-import { sortEdges } from './sorting';
+import { sortEdges, validateEndNodes, validateStartNode } from './sorting';
+import { toast } from 'sonner';
 
 export function parseGraphToYaml(
     nodes: FlowAppNode[],
@@ -16,8 +17,15 @@ export function parseGraphToYaml(
     // An index for Id to name mappings
     const nodeNameIndex: Record<string, string> = {}
 
+    const {updatedNodes, updatedEdges} = validateEndNodes(nodes, edges)
+
+    if (!validateStartNode(nodes)) {
+        toast.warning("Each flow must have a start node", {position: "top-center"})
+        return "";
+    }
+
     // Process nodes
-    nodes.forEach(node => {
+    updatedNodes.forEach(node => {
         if (['agentComponent', 'deterministicComponent', 'oneOffComponent'].includes(node.type as string)) {
             // Remove React Flow specific properties, keep component properties
             const { name, prompt_id, prompt_version, toolset, tool_name, inputs, ui_log_events, ui_role_as, max_correction_attempts } = node.data;
@@ -59,7 +67,7 @@ export function parseGraphToYaml(
     const edgesBySource: Record<string, Edge[]> = {};
 
     // Edges need to be sorted for routing
-    const sortedEdges: Edge[] = sortEdges(edges)
+    const sortedEdges: Edge[] = sortEdges(updatedEdges)
 
     sortedEdges.forEach(edge => {
         if (edge.type === 'dependency') return;

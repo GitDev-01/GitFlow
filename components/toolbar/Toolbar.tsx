@@ -18,10 +18,12 @@ export default function Toolbar() {
     const handleExport = () => {
         try {
             const yamlConfig = parseGraphToYaml(nodes, edges, activeFlowConfig || {});
-            setYamlOutput(yamlConfig);
-            setShowExportModal(true);
+            if (yamlConfig !== ""){
+                setYamlOutput(yamlConfig);
+                setShowExportModal(true);
+            }
         } catch (e) {
-            console.error("Export failed", e);
+            console.error("Export failed");
         }
     };
 
