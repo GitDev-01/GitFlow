@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     ReactFlow,
     Background,
@@ -8,7 +8,7 @@ import {
     MiniMap,
     applyNodeChanges,
     applyEdgeChanges,
-    NodeChange,
+    Panel,
     EdgeChange,
     Connection,
     addEdge,
@@ -39,6 +39,9 @@ import { validateEndNodes } from '@/lib/sorting';
 import {toast} from 'sonner'
 
 import { Silkscreen } from 'next/font/google';
+import { InfoIcon } from 'lucide-react';
+import { QuickGuidesDialog } from '../toolbar/QuickGuide';
+import InfoSpinner from '../misc/spinner';
 
 const slikscreen = Silkscreen({
   weight: "400",
@@ -51,6 +54,7 @@ export default function FlowCanvas() {
     const { nodes, edges, setNodes, setEdges, setSelectedNodeId, setActiveFlow } = useFlowStore();
 
     const {lastAction, isConnected} = useMCP()
+    const [open, setOpenDialog] = useState<boolean>(false)
 
     const nodeTypes = useMemo(() => ({
         agentComponent: AgentNode,
@@ -242,7 +246,9 @@ export default function FlowCanvas() {
                 <Background gap={16} size={1} color="#e5e7eb" />
                 <Controls />
                 <MiniMap zoomable pannable nodeClassName={(node) => `bg-gray-200`} />
+                <Panel position='top-left' className="relative cursor-pointer"><InfoSpinner handleOpenDialog={()=>setOpenDialog(true)}/></Panel>
             </ReactFlow>
+            <QuickGuidesDialog open={open} onOpenChange={setOpenDialog}/>
 
             {/* Add empty state overlay here */}
             {nodes.length === 0 && (

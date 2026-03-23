@@ -45,6 +45,14 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Guide tokens */
+  --color-guide-accent: var(--guide-accent);
+  --color-guide-sidebar: var(--guide-sidebar);
+  --color-guide-hover: var(--guide-hover);
+  --color-guide-active: var(--guide-active);
+  --color-guide-badge: var(--guide-badge);
+  --color-guide-badge-text: var(--guide-badge-text);
 }
 
 :root {
@@ -80,6 +88,14 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Guide-specific tokens */
+  --guide-accent: oklch(0.53 0.22 264);
+  --guide-sidebar: oklch(0.975 0.006 240);
+  --guide-hover: oklch(0.93 0.008 240);
+  --guide-active: oklch(0.96 0.012 264);
+  --guide-badge: oklch(0.88 0.06 264);
+  --guide-badge-text: oklch(0.35 0.18 264);
 }
 
 .dark {
@@ -114,6 +130,14 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Guide-specific tokens – dark */
+  --guide-accent: oklch(0.64 0.22 264);
+  --guide-sidebar: oklch(0.17 0.014 240);
+  --guide-hover: oklch(0.22 0.014 240);
+  --guide-active: oklch(0.24 0.022 264);
+  --guide-badge: oklch(0.28 0.08 264);
+  --guide-badge-text: oklch(0.78 0.16 264);
 }
 
 @layer base {
