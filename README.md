@@ -6,7 +6,7 @@
 
 [![Watch the video](https://img.youtube.com/vi/WyO-LfOpDvU/0.jpg)](https://www.youtube.com/watch?v=WyO-LfOpDvU)
 
-**Watch Me**
+[Devpost](https://devpost.com/software/gitflow-ka148b)
 
 <br />
 
@@ -47,7 +47,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser and your d
 
 ## Flow with Gitlab Agents
 The GitFlow MCP Server allows Gitlab Agents - specifically the "GitFlow Yaml Agent" - to visualise flows
-directly from the IDE.
+directly from the IDE. 
+
+Claude Sonnet 4.5 is the recommeded model (see [Model Recommendation](https://github.com/GitDev-01/GitFlow?tab=readme-ov-file#model-recommendation))
 
 To access the GitFlow Yaml Agent use the GitLab AI Catalog.
 
@@ -94,4 +96,18 @@ npm run build
 npm start
 ```
 
-Thanks for stopping by!. Don't forget to like and subscribe. [Devpost](https://devpost.com/software/gitflow)
+<br />
+
+## Model Recommendation
+The GitFlow model of choice is Claude Sonnet 4.5, see reasoning below:
+
+[Document Summary](https://github.com/GitDev-01/GitFlow/blob/master/model_choice/Model%20Selection%20Findings.pdf)
+
+[Statistical Code](https://github.com/GitDev-01/GitFlow/blob/master/model_choice/claude_model_eval.py)
+
+Please note this was **not** done by professionals, just a person who likes to read.
+Claude was used during the creation of the code and document summary, please raise issues if there are any 😀. 
+
+<br/>
+
+Thanks for stopping by!.
