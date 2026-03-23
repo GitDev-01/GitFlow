@@ -147,7 +147,7 @@ export function QuickGuidesDialog({
           <aside className="w-52 shrink-0 bg-guide-sidebar border-r border-border/60 flex flex-col py-5 px-3 gap-1">
             <DialogHeader className="px-2 pb-4">
               <DialogTitle className="text-sm font-semibold text-foreground tracking-wide uppercase">
-                Quick Guides
+                Quick Guide
               </DialogTitle>
             </DialogHeader>
 
