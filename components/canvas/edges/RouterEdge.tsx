@@ -47,7 +47,7 @@ export default function RouterEdge({
 
     return (
         <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} className="stroke-2 stroke-gray-600 transition-all hover:stroke-4" />
+            <BaseEdge path={edgePath} markerEnd={markerEnd} className="stroke-2 stroke-gray-600 hover:stroke-4" />
             {label && (
                 <EdgeLabelRenderer>
                     <button
